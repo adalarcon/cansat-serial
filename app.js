@@ -1,7 +1,8 @@
 const SerialPort  = require('serialport');
 const ab2str      = require('arraybuffer-to-string')
+const db          = require('./helper/mongo.client');
 
-const PORT = '/dev/tty.usbmodem1411';
+const PORT = '/dev/tty.usbmodem1421';
 const BAUD_RATE = 19200;
 
 var result = "";
@@ -13,6 +14,7 @@ var port = new SerialPort(PORT, {
 console.log("Connecting to port:  ", PORT, " at ", BAUD_RATE);
 
 setInterval(function() {
+  console.log('.');
   run();
 }, 3000);
 
@@ -23,9 +25,10 @@ port.on('error', function(err) {
 })
 
 // Read data that is available but keep the stream from entering "flowing mode"
-port.on('readable', function () {
-  console.log('Data:', port.read());
-});
+// port.on('readable', function () {
+//   //console.log('Data:', port.read());
+//   result += arrayBufferToString(port.read());
+// });
 
 port.on('open', function() {
   console.log('Port connected');
@@ -87,7 +90,12 @@ var run = function(){
       var logs = result.split("#");
       if(logs.length>= 2){
         for (var i = 0; i < logs.length; i++) {
-          console.log(JSON.parse(logs[i]));
+          db.insertOne('logs', JSON.parse(logs[i])).then(function(data){
+            console.log('.');
+          }).catch(function (error) {
+            console.log(error);
+          });
+
         }
         result = "";
       }
