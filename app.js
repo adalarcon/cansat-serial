@@ -1,3 +1,4 @@
+const env         = require('dotenv').config()
 const SerialPort  = require('serialport');
 const db          = require('./helper/mongo.client');
 const io          = require('socket.io-client');
@@ -9,7 +10,8 @@ const Readline    = SerialPort.parsers.Readline;
 const port        = new SerialPort(PORT, { baudRate: BAUD_RATE });
 const parser      = new Readline();
 
-const socket      = io('http://localhost:3800/api/v1/io/logs')
+//const socket    = io('http://localhost:3800/api/v1/io/logs')
+const socket      = io('https://cansat.herokuapp.com/api/v1/io/logs')
 var count         = 0;
 
 //  Available ports
@@ -26,6 +28,7 @@ port.pipe(parser);
 // on get data from port
 parser.on('data', (data) => {
   var obj = JSON.parse(data)
+  obj.timestamp = new Date();
   console.log("[serial][data] %s >>> %s", obj.type, count++);
 
   // Send data

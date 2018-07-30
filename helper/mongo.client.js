@@ -3,8 +3,8 @@ const MongoClient = mongodb.MongoClient;
 const ObjectID    = require('mongodb').ObjectID;
 const GridStore   = require('mongodb').GridStore;
 const config      = require('../config/config');
-const url         = config.database.url;
-const dbName      = config.database.dbName;
+const url         = process.env.DB_URL;
+const dbName      = process.env.DB_NAME;
 const fs          = require('fs');
 const isID        = new RegExp("^[0-9a-fA-F]{24}$");
 

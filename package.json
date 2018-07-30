@@ -9,6 +9,7 @@
   "private": true,
   "dependencies": {
     "arraybuffer-to-string": "^1.0.2",
+    "dotenv": "^6.0.0",
     "express": "^4.16.3",
     "mongodb": "^3.1.1",
     "serialport": "^6.2.1",
