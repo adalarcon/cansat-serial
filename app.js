@@ -1,60 +1,47 @@
 const SerialPort  = require('serialport');
-const ab2str      = require('arraybuffer-to-string')
 const db          = require('./helper/mongo.client');
-const parser      = require('./helper/parser');
+const io          = require('socket.io-client');
 
-const PORT = '/dev/tty.usbmodem1421';
-const BAUD_RATE = 19200;
+const PORT        = '/dev/tty.usbmodem1411';
+const BAUD_RATE   = 19200;
 
-var result = "";
+const Readline    = SerialPort.parsers.Readline;
+const port        = new SerialPort(PORT, { baudRate: BAUD_RATE });
+const parser      = new Readline();
 
-var port = new SerialPort(PORT, {
-  baudRate: BAUD_RATE
-});
+const socket      = io('http://localhost:3800/api/v1/io/logs')
+var count         = 0;
 
-console.log("Connecting to port:  ", PORT, " at ", BAUD_RATE);
-
-setInterval(function() {
-  console.log('.');
-  run();
-}, 3000);
-
-
-// Open errors will be emitted as an error event
-port.on('error', function(err) {
-  console.log('Error: ', err.message);
-})
-
-// Read data that is available but keep the stream from entering "flowing mode"
-// port.on('readable', function () {
-//   //console.log('Data:', port.read());
-//   result += arrayBufferToString(port.read());
-// });
-
-port.on('open', function() {
-  console.log('Port connected');
-});
-
-port.on('data', function(data) {
-  result += parser.arrayBufferToString(data);
-});
-
-var run = function(){
-  if(result){
-    try{
-      var logs = result.split("#");
-      if(logs.length>= 2){
-        for (var i = 0; i < logs.length; i++) {
-          db.insertOne('logs', JSON.parse(logs[i])).then(function(data){
-            console.log('.');
-          }).catch(function (error) {
-            console.log(error);
-          });
-        }
-        result = "";
-      }
-    }catch(e){
-      //console.log(e);
-    }
+//  Available ports
+SerialPort.list().then(ports => {
+  console.log("[serial] Available Ports");
+  for (var i = 0; i < ports.length; i++) {
+    console.log("[serial] port: ", ports[i].comName);
   }
-}
+});
+
+// Serial Parser
+port.pipe(parser);
+parser.on('data', (data) => {
+  var obj = JSON.parse(data)
+  console.log("[serial][data] %s >>> %s", obj.type, count++);
+
+  if(obj.type == "imu"){
+    socket.emit('imu', obj);
+  }else if(obj.type == "gps"){
+    socket.emit('gps', obj);
+  }
+
+});
+
+socket.on('connect', function(){
+  console.log('[socket] socket connected ');
+});
+
+socket.on('action', function(data){
+  console.log('[socket] action', data);
+});
+
+socket.on('disconnect', function(){
+  console.log('[socket] disconnect');
+});
