@@ -22,26 +22,32 @@ SerialPort.list().then(ports => {
 
 // Serial Parser
 port.pipe(parser);
+
+// on get data from port
 parser.on('data', (data) => {
   var obj = JSON.parse(data)
   console.log("[serial][data] %s >>> %s", obj.type, count++);
 
-  if(obj.type == "imu"){
-    socket.emit('imu', obj);
-  }else if(obj.type == "gps"){
-    socket.emit('gps', obj);
-  }
+  // Send data
+  socket.emit(obj.type, obj);
+
+  // Save Data
+  db.insertOne('logs', obj).then(function(data){
+
+  }).catch(function (error) {
+    console.log(error);
+  });
 
 });
 
-socket.on('connect', function(){
+socket.on('connect', () => {
   console.log('[socket] socket connected ');
 });
 
-socket.on('action', function(data){
+socket.on('action', (data) => {
   console.log('[socket] action', data);
 });
 
-socket.on('disconnect', function(){
+socket.on('disconnect', () => {
   console.log('[socket] disconnect');
 });
