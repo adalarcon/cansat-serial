@@ -3,15 +3,15 @@ const SerialPort  = require('serialport');
 const db          = require('./helper/mongo.client');
 const io          = require('socket.io-client');
 
-const PORT        = '/dev/tty.usbmodem1411';
-const BAUD_RATE   = 19200;
+const PORT        = 'COM13';
+const BAUD_RATE   = 57600;
 
 const Readline    = SerialPort.parsers.Readline;
 const port        = new SerialPort(PORT, { baudRate: BAUD_RATE });
 const parser      = new Readline();
 
-//const socket    = io('http://localhost:3800/api/v1/io/logs')
-const socket      = io('https://cansat.herokuapp.com/api/v1/io/logs')
+const socket    = io('http://localhost:3000/api/v1/io/logs')
+//const socket      = io('https://cansat.herokuapp.com/api/v1/io/logs')
 var count         = 0;
 
 //  Available ports
