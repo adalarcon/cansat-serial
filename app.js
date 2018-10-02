@@ -27,24 +27,22 @@ port.pipe(parser);
 
 // on get data from port
 parser.on('data', (data) => {
-  console.log("imput: ", data);
-
+  console.log("[serial] imput: ", data);
   if(data && data !=''){
-    var obj = JSON.parse(data)
-    obj.timestamp = new Date();
-    console.log("[serial][data] %s >>> %s", obj.type, count++);
+    try {
+         var obj = JSON.parse(data)
+         obj.timestamp = new Date();
+         console.log("[socket][data] %s >>> %s", obj.type, count++);
+         socket.emit(obj.type, obj);
 
-    // Send data
-    socket.emit(obj.type, obj);
-
-    // Save Data
-    db.insertOne('logs', obj).then(function(data){
-
-    }).catch(function (error) {
-      console.log(error);
-    });
+         // Save Data
+         db.insertOne('logs', obj).then().catch(function (error) {
+           console.log("[serial] Error inserting on database: ", error);
+         });
+    } catch (err) {
+        console.log("[serial] Error parsing JSON", err);
+    }
   }
-
 });
 
 socket.on('connect', () => {
