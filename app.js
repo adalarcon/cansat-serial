@@ -3,7 +3,7 @@ const SerialPort  = require('serialport');
 const db          = require('./helper/mongo.client');
 const io          = require('socket.io-client');
 
-const PORT        = 'COM13';
+const PORT        = '/dev/tty.usbserial-A501LLYX';
 const BAUD_RATE   = 57600;
 
 const Readline    = SerialPort.parsers.Readline;
